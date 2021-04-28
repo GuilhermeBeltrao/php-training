@@ -35,7 +35,7 @@ Route::get('/contact', '\App\Http\Controllers\PostsController@contact');
 
 use Illuminate\Support\Facades\DB;
 
-//  CRUP in database
+//  CRUD in database
 
 Route::get('/insert', function(){
     //insert RAW sql queries into database
