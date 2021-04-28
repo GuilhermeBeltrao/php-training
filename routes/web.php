@@ -32,3 +32,32 @@ Route::get('admin/posts', array('as'=>'admin.home', function(){
 Route::get('posts/{id}', '\App\Http\Controllers\PostsController@show_post');
 
 Route::get('/contact', '\App\Http\Controllers\PostsController@contact');
+
+use Illuminate\Support\Facades\DB;
+
+//  CRUP in database
+
+Route::get('/insert', function(){
+    //insert RAW sql queries into database
+    DB::insert('insert into posts(title, content) values(?, ?)', ['PHP with Laravel', 'nice framework tbh']); 
+});
+
+Route::get('/read', function(){
+    //reading raw sql queries from database
+    $results = DB:: select('select * from posts where id = ?', [1]);
+    // foreach($results as $post){
+    //     return $post->title;
+    return var_dump($results);
+});
+
+Route::get('/update', function(){
+
+    $updated = DB::update('update posts set title = "Update_title" where id = ?', [1]);
+    return $updated;
+
+});
+
+Route::get('/delete', function(){
+    $deleted = DB::delete('delete from posts where id = ?', [1]);
+    return $deleted;
+});
