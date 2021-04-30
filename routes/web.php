@@ -1,8 +1,12 @@
 <?php
 
 use App\Models\Post;
+use App\Models\User;
+use App\Models\Photo;
+use App\Models\Country;
 use Illuminate\Support\Facades\Route;
-use app\Posts;
+
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -44,6 +48,8 @@ use Illuminate\Support\Facades\DB;
 
 
 // ----------------------Raw sql CRUD in database----------------------
+
+
 // Route::get('/insert', function(){
 //     //insert RAW sql queries into database
 //     DB::insert('insert into posts(title, content) values(?, ?)', ['this is a test', 'this is a test too']); 
@@ -77,6 +83,8 @@ use Illuminate\Support\Facades\DB;
 
 
 //----------------------ELOQUENT CRUD----------------------
+
+
 Route::get('/read/{id}', function($id){
     $post = Post::find($id);
 
@@ -97,12 +105,12 @@ Route::get('/findwhere/{id}', function($id){
 });
 
 
-// Route::get('/findmore', function(){
-//     //$posts = Post::findOrFail(5);
-//     //return $posts;
+Route::get('/findmore', function(){
+    //$posts = Post::findOrFail(5);
+    //return $posts;
 
-//     $posts = Post::where('users_count', '<', 50)->firstOrFail();
-// });
+    $posts = Post::where('users_count', '<', 50)->firstOrFail();
+});
 
 
 // Route::get('/basicinsert', function(){
@@ -115,9 +123,9 @@ Route::get('/findwhere/{id}', function($id){
 // });
 
 
-Route::get('/create/{title}/{content}', function($title, $content){
+Route::get('/create/{title}/{content}/{user_id}', function($title, $content, $user_id){
     
-    Post::create(['title'=>$title, 'content'=>$content]);
+    Post::create(['title'=>$title, 'content'=>$content, 'user_id'=>$user_id]);
 });
 
 
@@ -156,4 +164,103 @@ Route::get('/restore', function(){
 Route::get('/forcedelete', function(){
 
     Post::onlyTrashed()->where('is_admin', 0)->forcedelete();
+});
+
+
+
+
+// ----------------------ELOQUENT RELATIONSHIPS----------------------
+
+
+// #### one to one relationship ####
+// Route::get('/user/{user_id}/post', function($user_id){
+
+//     User::find($user_id)->post;
+
+// });
+
+
+// Route::get('/post/{id}/user', function($id){
+
+//     return Post::find($id)->user->name;
+// });
+
+
+// #### one to many relationship ####
+
+Route::get('/{user_id}/posts', function($user_id){
+
+    $user = User::find($user_id);
+    foreach($user->posts as $post){
+
+        echo $post->title. "<br>"; 
+   }
+
+});
+
+
+// #### many to many relationship ####
+
+//find role by user_id
+Route::get('/user/{user_id}/role', function($user_id){
+
+    $user = User::find($user_id);
+
+    foreach($user->roles as $role){
+        
+        return $role->name;
+    }
+});
+  
+
+//accessing pivot table
+Route::get('/user/{id}/pivot', function($id){
+    
+    $user = User::find($id);
+    foreach($user->roles as $role) {
+
+        return $role->pivot;
+    }
+});
+
+
+//  #### many through relationship ####
+
+//find posts by country
+Route::get('/user/{country_id}/country', function($country_id){
+
+    $country = Country::find($country_id);
+    foreach($country->posts as $post){
+        
+        return $post->title;
+    }
+});
+
+
+Route::get('/{x}/{id}/photos', function($x, $id){
+
+    if($x == 'user') {
+        
+        $user = User::find($id);
+
+        foreach($user->photos as $photo) {
+
+            return $photo;
+        }
+    }elseif($x == 'post') {
+        
+        $post = Post::find($id);
+        foreach($post->photos as $photo) {
+
+            return $photo;
+        }
+    }
+
+    
+});
+
+Route::get('photo/{id}/post', function($id){
+
+    $photo = Photo::findOrFail($id);
+    return $photo->imageable;
 });
